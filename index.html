@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head >
+        <!-- META tags -->
+        <meta charset="utf-8">
+        <!-- display on mobile devices -->
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+        <!-- link to the local stylesheet -->
+        <link rel="stylesheet" type="text/css" href="styles.css">
+        <!-- title displayed in browser tab -->
+        <title>Openbox on Voidlinux</title>
+    </head>
+    <body>
+        <nav id="navbar">
+            <header>Install Voidlinux Base</header>
+            <p>and install and configure OpenBox</p>
+            <ul>
+                <li><a class="nav-link" href="#Introduction">Introduction</a></li>
+                <li><a class="nav-link" href="#Prerequisites">Prerequisites</a></li>
+                <li><a class="nav-link" href="#XBPS_Package_Manager">XBPS Package Manager</a></li>
+                <li><a class="nav-link" href="#Installation">Installation</a></li>
+                <li><a class="nav-link" href="#Partitioning">Partitioning</a></li>
+                <li><a class="nav-link" href="#User_not_created_after_install">User not created after install</a></li>
+                <li><a class="nav-link" href="#Setup_mirrors_including_non_free_repository">Setup mirrors including non free repository</a></li>
+                <li><a class="nav-link" href="#Window_Manager">Window Manager</a></li>
+                <li><a class="nav-link" href="#Edit_lightdm_conf">Edit lightdm conf</a></li>
+                <li><a class="nav-link" href="#Now_install_some_favourites">Now install some favourites</a></li>
+                <li><a class="nav-link" href="#Create_and_edit_autostart">Create and edit autostart</a></li>
+                <li><a class="nav-link" href="#Sound_with_Pipewire">Sound with Pipewire</a></li>
+                <li><a class="nav-link" href="#Some_customisation">Some customisation</a></li>
+                <li><a class="nav-link" href="#Creating_a_Logout_UI">Creating a Logout UI</a></li>
+                <li><a class="nav-link" href="#Reference">Reference</a></li>
+            </ul>
+        </nav>
+        <main id="main-doc">
+            <section id="Introduction" class="main-section">
+                <header>Introduction</header>
+                <p>
+                Welcome to the my VoidLinux backup wiki! These are my personal 
+                notes to guide me through installing Void Linux Base image and 
+                create a customised version of an Openbox desktop with the X11 
+                display server and Pipewire for sound. If others are able to 
+                make use of it that's great too, I will attempt to make this 
+                wiki more legible over time. During the install you will use 
+                the following credentials:
+                </p>
+                <p>Username 'root' and the password 'voidlinux'</p>
+            </section>
+            <section id="Prerequisites" class="main-section">
+                <header>Prerequisites</header>
+                <ul>
+                    <li>A working ISO of a X86_64 VoidLinux base Live Image burned to a USB stick</li>
+                    <li>Knowledge of how to boot from a USB</li>
+                    <li>Previous experience installing linux</li>
+                    <li>Confidence in using the command line</li>
+                    <li>Time to spare and a willingness to try</li>
+                </ul>
+                <p><strong>NOTE: </strong>On the <a href="https://voidlinux.org/download/" target="_blank">download page</a>
+                you have a choice of glibc or musl. If you are unsure which one 
+                you would like to use choose glibc.
+                </p>
+            </section>
+            <hr>
+            <section id="XBPS_Package_Manager" class="main-section">
+                <header>XBPS Package Manager</header>
+                <p>The package manager for Void is XBPS and the following commands will get you started:</p>
+                <p>
+                <code>sudo xbps-install -S</code> (syncs mirrors)<br>
+                <code>sudo xbps-install -Su</code> (updates installed software)<br>
+                <code>sudo xbps-query -Rs</code> <em>item-to-search-for</em><br>
+                <code>sudo xbps-install -S</code> <em>item-to-install</em><br>
+                <code>sudo xbps-remove</code> <em>item-to-remove</em><br>
+                </p>
+                <p>For a more in-depth description see: <a href="https://docs.voidlinux.org/xbps/index.html" target="_blank">Void Linux XBPS Package Manager</a></p>
+            </section>
+            <section id="Installation" class="main-section">
+                <header>Installation</header>
+                <p>Run the folowing command to start the install process:<br>
+                <code># void-installer</code></p>
+                <p><strong>NOTE: </strong>Install the network version - not local</p>
+            </section>
+            <section id="Partitioning" class="main-section">
+                <header>Partitioning</header>
+                <p>Use CFdisk for partioning and use DOS (MBR) for BIOS systems (gpt for efi)<br>
+                <strong>NOTE: </strong>I use 3 Primary partions for my MBR install:</p>
+                <ul>
+                    <li>boot vFAT32 = 1GB</li>
+                    <li>swap = 2x Ram</li>
+                    <li>/ = rest of disk</li>
+                </ul>
+                <p>reboot after install</p>
+            </section>
+            <section id="User_not_created_after_install" class="main-section">
+                <header>User not created after install</header>   
+                <p>
+                <code># useradd -m</code><em> username</em><br>
+                <code># passwd</code><em> username</em> (then follow prompts)<br>
+                <code># usermod -a -G wheel,floppy,audio,video,cdrom,optical,kvm,xbuilder</code><em> username</em><br>
+                <code># mkdir Documents Downloads Music Pictures Public videos</code><br>
+                <code># su</code> <em>username</em><br>
+                <code>$ mkdir Documents Downloads Music Pictures Public videos</code></p>
+            </section>
+            <section id="Setup_mirrors_including_non_free_repository" class="main-section">
+                <header >Setup mirrors including non free repository</header>
+                <p>
+                <code>$ sudo xbps-install -Su xbps</code><br>
+                <code>$ sudo xbps-install -S void-repo-nonfree</code><br>
+                <code>$ sudo mkdir -p /etc/xbps.d</code><br>
+                <code>$ sudo cp /usr/share/xbps.d/00-repository-main.conf /etc/xbps.d/</code><br>
+                <code>$ sudo cp /usr/share/xbps.d/10-repository-nonfree.conf /etc/xbps.d/</code>
+                <p>
+                <strong>NOTE: </strong>Edit the config files to a repository near
+                you using <a href="https://docs.voidlinux.org/xbps/repositories/mirrors/index.html" target="_blank">Void Mirrors</a> as a guide,
+                keep /current at the end eg <code>https://repo-de.voidlinux.org/current</code>
+                </p>
+                <p><code>$ sudo xbps-install -S</code> (to sync mirrors)<br>
+                <code>$ sudo xbps-install -Su</code>  (to check for updates)</p>
+                <p>I use xorg for my display server, dbus for inter-process comms,
+                elogind tracks logged in users and I prefer to use vim rather than vi.
+                I also install psmisc proc filesystem utilities for killall etc.<br>
+                <code>$ sudo xbps-install -S xorg dbus elogind vim psmisc</code></p>
+                <p>Create symbolic links to auto run services:<br>
+                <code>$ sudo ln -s /etc/sv/dbus /var/service</code><br>
+                <code>$ sudo ln -s /etc/sv/elogind /var/service</code></p>
+                <p>Now start those services:<br>
+                <code>$ sudo sv up dbus</code><br>
+                <code>$ sudo sv up elogind</code></p>
+                <p>Set keyboard layout if needed:<br>
+                <code>$ sudo setxkbmap -layout gb</code></p>
+            </section>
+            <hr>
+            <section id="Window_Manager" class="main-section">
+                <header>Window Manager</header>
+                <p>First I install the basic packages I need for Openbox and that includes 
+                xterm as you will be able to access that terminal from the right-click 
+                menu when you first log in to Openbox. Once the menu has been configured
+                you can access the other programs installed on your system. Obmenu-generator 
+                will help us with that, picom is a compositor, tint2 handles our panel / taskbar 
+                and lightdm is our display manager.<br>
+                <code>$ sudo xbps-install -S openbox obconf obmenu-generator picom tint2 xterm lightdm lightdm-gtk3-greeter</code></p>
+                <p>Now I install other desktop related tools <br>
+                <code>$ sudo xbps-install nitrogen xdg-desktop-portal-gtk lxappearance gnome-backgrounds mate-backgrounds nerd-fonts nerd-fonts-otf</code></p>
+                <p>I then grab networking tools <br>
+                <code>$ sudo xbps-install -S NetworkManager avahi nss-mdns</code></p>
+                <p>and some essentials <br>
+                <code>$ sudo xbps-install -S git curl wget alacritty  fontmanager firefox dmenu cups system-config-printer Thunar leafpad</code></p>
+                <p><strong>NOTE: </strong>Polkit will be installed with the above as a dependency</p>
+                <p>Let's start some more services:<br>
+                <code>$ sudo ln -s /etc/sv/cupsd /var/service</code><br>
+                <code>$ sudo ln -s /etc/sv/avahi-daemon /var/service</code><br>
+                <code>$ sudo sv up cupsd</code><br>
+                <code>$ sudo sv up avahi-daemon</code></p>
+                <p><strong>NOTE: </strong>If you are installing on a VM you may need
+                to edit picom.conf and comment out the vsync entry. I usually like 
+                to create my own configs as I learn over time but in this case my 
+                picom.conf is copied directly from Derek Taylor's (DistroTube) 
+                <a href="https://distro.tube/" target="_blank">gitlab dotfiles repo</a> as I am still 
+                studying picom and it's options. For now I will be staying with DT's
+                config as it is a very readable, short-and-to-the-point config file 
+                and is well commented.</p>
+            </section>
+            <hr>
+            <section id="Edit_lightdm_conf" class="main-section">
+                <header>Edit lightdm conf</header>
+                <p>
+                <code>$ sudo vim /etc/lightdm/lightdm.conf</code><br> 
+                type <code>/Seat</code> to search for that section, uncomment greeter-session
+                and change to your greeter <br>eg lightdm-gtk3-greeter <br>
+                <code>:wq</code> to write the file and quit vim.
+                </p>
+                <code>$ sudo ln -s /etc/sv/lightdm /var/service</code>
+                <p>Now login using your new graphical login manager</p>
+            </section>
+            <hr>
+            <section id="Now_install_some_favourites" class="main-section">
+                <header>Now install some favourites</header> 
+                <p>
+                <code>$ sudo xbps-install btop exa starship tldr neofetch ImageMagick feh gimp inkscape libreoffice</code><br>
+                <strong>NOTE: </strong>My rc.xml config assigns ImageMagick to the print screen key for screen shots.
+                </p>
+            </section>
+            <hr>
+            <section id="Create_and_edit_autostart" class="main-section">
+                <header>Create and edit autostart</header>
+                <p><code>$ vim .config/openbox/autostart</code></p>
+                <p>Enter the following lines (change xrandr to reflect your display):<br>
+                <pre>
+                <code>
+  xrandr --output Virtual-1 --mode 1920x1080 --rate 60 
+  tint2 & 
+  nitrogen --restore
+                </code>
+                </pre>
+                </p>
+                <p>or you could just git clone my dotfiles <br>
+                <code>$ git clone https://github.com/testpilotuk/myVoidLinuxBup.git</code></p>
+                <p>Set a new background using nitrogen by clicking preferences
+                and adding the directories  for the backgrounds you installed.</p>
+                <p>Now logout and log back in to check everything is working as expected.</p>
+            </section>
+            <hr>
+            <section id="Sound_with_Pipewire" class="main-section">
+                <header>Sound with Pipewire</header>
+                <p>
+                <code>$ sudo xbps-install -S pipewire wireplumber qpwgraph</code><br>
+                For a complete tutorial on the initial setup of Pipewire read <a href="https://github.com/yurifuko/dotfiles/wiki/Guides#how-to-pipewire-w-wireplumber-on-void-linux" target="_blank">Yurifuko's Wiki</a>
+                </p>
+                <p>Edit .config/openbox/autostart and add pipewire & to the file like this:<br>
+                <pre>
+                <code>
+  xrandr --output Virtual-1 --mode 1920x1080 --rate 60 & 
+  picom --config ~/.config/picom/picom.conf &
+  pipewire &
+  (sleep 2s && nitrogen --restore --set-scaled) &
+  tint2 &
+                    </code>
+                </pre>
+                    </p>
+                <p>and now reboot with: <code>$ loginctl reboot</code></p>
+            </section>
+            <hr>
+            <section id="Some_customisation" class="main-section">
+                <header>Some customisation</header>
+                <p><code>$ sudo xbps-install breeze gnome-themes-standard<br>
+                    $ obmenu-generator -p</code> (to generate a menu based on installed apps)</p>
+                <p>Edit the .config/obmenu-generator/config.pl and change geany
+                to leafpad (unless you decided to install geany).</p>
+                <p>Go to your right click menu and choose <code>advanced settings > obmenu-generator > Menu Schema</code>
+                and change the menu default apps to ones you have installed</p>
+                <p>For some nice <a href="https://github.com/addy-dclxvi/openbox-theme-collections" target="_blank">openbox themes:</a><br>
+                <code>$ git clone https://github.com/addy-dclxvi/openbox-theme-collections ~/.themes</code></p>
+                <p>For some nice <a href="https://github.com/downthecrop/tint2-theme-collections" target="_blank">tint2 themes:</a><br>
+                <code>$ git clone https://github.com/downthecrop/tint2-theme-collections.git ~/.config/tint2</code></p>
+                <code>$ obconf</code> (openbox theme changer - I chose Raven)<br>
+                <code>$ lxappearance</code> (gtk theme changer - I chose Adwaita-dark)
+                <p>Improve firefox font rendering by taking away bitmap fonts <br>
+                <code>$ sudo ln -s /usr/share/fontconfig/conf.avail/70-no-bitmaps.conf /etc/fonts/conf.d/</code></p>
+            </section>
+            <hr>
+            <section id="Creating_a_Logout_UI" class="main-section">
+                <header>Creating a Logout UI</header>
+                <p>For this I use Clearine - see okitavera's <a href="https://github.com/okitavera/clearine" target="_blank">github page</a><br>
+                <code>$ sudo xbps-install -S clearine</code></p>
+                <p>Copy /etc/clearine.conf to ~/.config/clearine.conf and change the commands as we are using elogind:<br>
+                <code>restart = loginctl reboot</code><br>
+                <code>shutdown = loginctl poweroff</code></p>
+                <p>Or just copy my config over to ~/.config/ Also, it would be a good idea to read the <a href="https://docs.voidlinux.org/config/power-management.html" target="_blank">Void Linux Power Management </a>page.</p>
+            </section>
+            <hr>
+            <section id="Reference" class="main-section">
+                <header>Reference</header>
+                <p>All text is taken from <a href="https://github.com/testpilotuk/myVoidLinuxBup/wiki" target="_blank">my github page</a></p>
+            </section>
+        </main>
+    </body>
+    <footer>
+    </footer>
+</html>
